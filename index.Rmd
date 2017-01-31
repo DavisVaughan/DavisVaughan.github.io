@@ -1,0 +1,8 @@
+---
+title: "Vaughan Blog"
+author: "Davis Vaughan"
+date: "1/31/2017"
+output: html_document
+---
+
+Hello world. 
