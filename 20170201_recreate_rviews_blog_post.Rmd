@@ -22,7 +22,7 @@ We will be using the same tickers as RViews.
 
 ```{r}
 # List of tickers for sector etfs. 
-ticker <- c("XLY", "XLP", "XLE",    "XLF", "XLV",   
+ticker <- c("XLY", "XLP", "XLE", "XLF", "XLV",
             "XLI", "XLB", "XLK", "XLU", "SPY")  
 
 # And the accompanying sector names for those ETFs.
@@ -50,7 +50,7 @@ prices <- tq_get(etf_ticker_sector, get = "stock.prices") %>% group_by(ticker, s
 etf_returns <- prices %>% tq_transform(ohlc_fun = Cl,  transform_fun = periodReturn, 
                                        period = 'weekly', type = 'log')
 
-head(etf_returns)
+etf_returns
 ```
 
 ## RViews
@@ -98,7 +98,7 @@ index <- filter(etf_returns, ticker == "SPY") %>%
 
 etf_returns <- inner_join(etf_returns, index, by = "date")
 
-head(etf_returns)
+etf_returns
 ```
 
 Now what? RViews used the more generic `rollapply()`, and then created the function for correlations. While this would definitely be possible using `tq_mutate`, it's easier to just use the `runCor()` function from the `TTR` package through `tq_mutate_xy()` instead.
@@ -117,7 +117,7 @@ etf_returns_runCor <- etf_returns %>% tq_mutate_xy(x = weekly.returns, y = index
                                                    n = 20)
 # Getting past the NA's
 options(tibble.width = Inf)
-etf_returns_runCor[15:25,]
+etf_returns_runCor
 ```
 
 ## RViews

@@ -9,6 +9,7 @@ navbar:
       href: about.html
 output:
   html_document:
+    df_print: paged
     css: custom.css
     output_dir: "docs"
     theme: simplex

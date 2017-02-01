@@ -18,13 +18,9 @@ p {
 }
 
 /*Code font*/
-.sourceCode {
-  font-size: 11pt;
-}
-
-/*Output font*/
-pre > code {
-  font-size: 11pt;
+.sourceCode > *, code{
+  font-size: 10pt;
+  font-family: arial !important;
 }
 
 /*------Navigation Bar------------------------------*/
@@ -78,7 +74,7 @@ a:hover {
   color: #505050;
 }
 
-/*------Tables------------------------------*/
+/*------Tables------------------------------
 table, td, th {
    border: 1px solid #009999;
    border-collapse: collapse;
@@ -89,9 +85,9 @@ th {
     color: white;
     font-size: 12pt;
 }
-
+*/
 td {
   color: #505050;
-  font-size: 12pt;
 }
+
 
