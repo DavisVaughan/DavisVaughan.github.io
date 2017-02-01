@@ -1,14 +1,15 @@
 output_dir: "."
 name: "my-website"
 navbar:
-  title: "vaughan_blog"
+  title: <div style="color:#009999;font-size:22px">v-blog</div>
   left:
-    - text: "home"
-      href: index.html
+    - text: "blog"
+      href: blog_directory.html
     - text: "about"
       href: about.html
 output:
   html_document:
+    css: custom.css
     output_dir: "docs"
-    theme: cosmo
+    theme: simplex
     highlight: textmate

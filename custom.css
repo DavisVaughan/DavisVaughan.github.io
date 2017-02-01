@@ -1,0 +1,61 @@
+/*------Font and Wording Colors------------------------------*/
+
+/*Title and H1 color*/
+h1 {
+  color: #009999;
+}
+
+/*Font size*/
+p {
+  font-size: 12pt;
+  color: #505050;
+}
+
+/*------Navigation Bar------------------------------*/
+
+/*Nav font size */
+.navbar { 
+  font-size: 12pt;
+}
+
+/*Sets the text hover color on navbar*/
+.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+color: #009999;
+}
+
+/*------Bulleted List------------------------------*/
+
+/*Bulleted List colors*/
+li a {
+  color: black;
+}
+li a:hover {
+  color: #009999;
+}
+
+/*Floating table of contents*/
+.tocify-header .tocify-item {
+  background-color: #009999;
+  color: white;
+}
+.tocify-header > a:focus {
+  background-color: blue;
+  color: white;
+}
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover{
+background-color: white ;
+color: #009999;
+}
+
+a {
+  color: #009999;
+}
+
+a:hover {
+  color: #505050;
+}
+
+
+
+
+

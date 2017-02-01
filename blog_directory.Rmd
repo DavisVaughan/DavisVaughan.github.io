@@ -1,0 +1,11 @@
+---
+title: "Blog Directory"
+output: html_document
+---
+
+
+
+| Post  	                                                       | Description  	                                                |
+|------------------------                                        |----------------------------------------------------	          |
+| [Basics of ggplot2](20170131_basics_of_ggplot2.html)           | Investigate aesthetics, common geoms, and view pretty plots. 	|
+
