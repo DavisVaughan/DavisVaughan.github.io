@@ -1,8 +1,6 @@
 ---
-title: "Vaughan Blog"
-author: "Davis Vaughan"
-date: "1/31/2017"
+title: "V-Blog"
 output: html_document
 ---
 
-Hello world. 
+A blog about nothing, and everything. Oh, and lots of R.
