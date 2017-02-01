@@ -1,0 +1,206 @@
+---
+title: 'Recreating RView''s ''Reproducible Finance With R: Sector Correlations'''
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Introduction
+
+In the true spirit of reproducibility, we at Business Science thought that it would be appropriate to recreate the RViews [post](https://www.rstudio.com/rviews/2017/01/18/reproducible-finance-with-r-sector-correlations/) on reproducibility with Sector Correlations. This time, however, the `tidyquant` package will be used to streamline much of the code that is currently used. The main advantage of `tidyquant` is to bridge the gap between the best quantitative resources for collecting and manipulating quantitative data: `xts`, `quantmod` and `TTR`, and the data modeling workflow and infrastructure of the `tidyverse`.
+
+Let's start by loading some packages.
+
+```{r, message=FALSE}
+library(tidyquant)
+library(dplyr)
+library(dygraphs)
+```
+
+We will be using the same tickers as RViews.
+
+```{r}
+# List of tickers for sector etfs. 
+ticker <- c("XLY", "XLP", "XLE",    "XLF", "XLV",   
+            "XLI", "XLB", "XLK", "XLU", "SPY")  
+
+# And the accompanying sector names for those ETFs.
+sector <- c("Consumer Discretionary", "Consumer Staples", 
+            "Energy", "Financials", "Health Care", "Industrials", 
+            "Materials", "Information Technology", "Utilities", "Index")
+
+etf_ticker_sector <- tibble(ticker, sector)
+
+etf_ticker_sector
+```
+
+#
+
+<!---------------------------------------------------------->
+
+# Data Import {.tabset .tabset-fade}
+
+Alright, now is where things get interesting. RViews created a function to import closing prices using `getSymbols()` directly from the `quantmod` package. They then used `periodReturn()` to convert these prices to weekly log returns. Let's see how this could be done in `tidyquant`.
+
+## BizSci
+```{r}
+prices <- tq_get(etf_ticker_sector, get = "stock.prices") %>% group_by(ticker, sector)
+
+etf_returns <- prices %>% tq_transform(ohlc_fun = Cl,  transform_fun = periodReturn, 
+                                       period = 'weekly', type = 'log')
+
+head(etf_returns)
+```
+
+## RViews
+```{r, eval=FALSE}
+# A function to build an xts object of etf returns.
+
+etf_weekly_returns <- function(ticker) {
+
+# Download prices using getSybmols    
+symbols <- getSymbols(ticker, auto.assign = TRUE, warnings = FALSE)
+# Take just the Closing prices.
+etf_prices <- do.call(merge, lapply(symbols, function(x) Cl(get(x))))
+# Use the periodReturn() function to get log weekly returns.    
+etf_returns <- do.call(merge, lapply(etf_prices, 
+                                     function(x) periodReturn(x, period = 'weekly', type = 'log')))
+
+#Change the column names to the sector names from our dataframe above.
+
+colnames(etf_returns) <- etf_ticker_sector$sector
+    
+etf_returns
+
+}
+
+# Let's pass in our ticker symbols and build an xts object of etf returns
+etf_returns <- etf_weekly_returns(etf_ticker_sector$ticker)
+
+head(etf_returns)
+```
+
+#
+
+No need for `do.call()`, `lapply()` or any of that fun. It's all been taken care of for you. Grouping by ticker (and sector to keep the column) allows us to perform the transform on each group separately, but with one line of code. Also, notice that the data is preserved in a _tidy_ format, as opposed to the xts format that RViews uses. It would be easy to now create a function wrapping this like RViews did, allowing the user to just enter the tibble of tickers. This could be useful in the flexdashboard that they will create, but for this post, we chose not do to that.
+
+<!---------------------------------------------------------->
+
+# Rolling Correlations {.tabset .tabset-fade}
+
+The next step is to calculate _rolling correlations_. First let's add the index (which is currently the last group in the tibble) as it's own column. This is what our correlations will be calculated against. To do this, we will have to filter for that data, and inner join it with our original data set, easy.
+
+```{r}
+index <- filter(etf_returns, ticker == "SPY") %>% 
+    .[, c("date", "weekly.returns")] %>%
+    rename(index = weekly.returns)
+
+etf_returns <- inner_join(etf_returns, index, by = "date")
+
+head(etf_returns)
+```
+
+Now what? RViews used the more generic `rollapply()`, and then created the function for correlations. While this would definitely be possible using `tq_mutate`, it's easier to just use the `runCor()` function from the `TTR` package through `tq_mutate_xy()` instead.
+
+If you are new to `tidyquant`, `tq_mutate()` aggregates the functions from `TTR`, `xts`, and `quantmod` for OHLCV style data. As an added bonus, it keeps the data in tibble format for use in the tidyverse.
+
+`tq_mutate_xy()` works with functions from those packages that require two arguments (x and y), or if you have data that is not in OHLCV format. Here, we face both of those situations. 
+
+The usage of `runCor` by itself looks like: `runCor(x, y, n = 10)` so we will use `tq_mutate_xy()` to pass in the `x` and `y` arguments, and then pass through `n` using the `...`.
+
+## BizSci
+```{r}
+etf_returns_runCor <- etf_returns %>% tq_mutate_xy(x = weekly.returns, y = index,
+                                                   col_rename = "cor",
+                                                   mutate_fun = runCor, 
+                                                   n = 20)
+# Getting past the NA's
+options(tibble.width = Inf)
+etf_returns_runCor[15:25,]
+```
+
+## RViews
+```{r, eval=FALSE}
+# A function that calculates the rolling correlation between a sector ETF and the SPY SP500 ETF. 
+
+sector_index_correlation <- function(x, window) {
+    # Make one xts object to hold the sector returns and the SPY returns  
+    merged_xts <- merge(x, etf_returns$'Index')
+
+    # Use rollapply() to calculate the rolling correlations. 
+    # See what happens if you remove the 'pairwise.complete.obs' argument - the NAs will cause problems.
+    merged_xts$rolling_cor <- rollapply(merged_xts, window, 
+                                         function(x) cor(x[,1], x[,2], use = "pairwise.complete.obs"), 
+                                         by.column = FALSE)
+    
+    names(merged_xts) <- c("Sector Returns", "SPY Returns", "Sector/SPY Correlation")
+    
+    merged_xts
+}
+
+# Choose a sector ETF and a rolling window and pass them to the function we just build. 
+# Let's go with a 5 month window and the Information Technology sector.
+# We will now have a new xts object with 3 time series: sector returns, SPY returns
+# and the rolling correlation between those return series.
+
+IT_SPY_correlation <- sector_index_correlation(etf_returns$'Information Technology', 20)
+
+# Have a peek. The first 20 rows in the correlation column should be 
+# NAs. 
+
+head(IT_SPY_correlation, n = 25)
+```
+
+#
+
+Also, as opposed to the RViews function, this actually calculated the rolling correlations for _all_ of the groups in the tibble, not just the one that you pass in.
+
+<!---------------------------------------------------------->
+
+# Dygraph {.tabset .tabset-fade}
+
+Finally, let's recreate the Dygraph for the Information Tech sector. The most useful feature here is `as_xts()` a `tidyquant` function that provides an easy way to convert from tibbles to xts. Extracting just the cor column from that then allows us to use the same code as RViews to create the graph.
+
+## BizSci
+```{r, message=FALSE}
+filter(etf_returns_runCor, sector == "Information Technology") %>% 
+  as_xts(date_col = date) %>% 
+  .$cor %>%
+  dygraph(main = "Correlation between SP500 and Tech ETF") %>% 
+    dyAxis("y", label = "Correlation") %>% 
+    dyRangeSelector(height = 20) %>%
+    # Add shading for the recessionary period
+    dyShading(from = "2007-12-01", to = "2009-06-01", color = "#FFE6E6") %>% 
+    # Add an event for the financial crisis. 
+    dyEvent(x = "2008-09-15", label = "Fin Crisis", labelLoc = "top", color = "red")
+```
+
+## RViews
+```{r, eval=FALSE}
+# Let's graph the sector/index rolling correlation using our old friend dygraphs. 
+# I'll add an event for the financial crisis and shade the recession of 2007-2009 with 
+# an unimposing pink hue.
+
+dygraph(IT_SPY_correlation$'Sector/SPY Correlation', main = "Correlation between SP500 and Tech ETF") %>% 
+    dyAxis("y", label = "Correlation") %>% 
+    dyRangeSelector(height = 20) %>%
+    # Add shading for the recessionary period
+    dyShading(from = "2007-12-01", to = "2009-06-01", color = "#FFE6E6") %>% 
+    # Add an event for the financial crisis. 
+    dyEvent(x = "2008-09-15", label = "Fin Crisis", labelLoc = "top", color = "red")
+```
+
+#
+
+<!---------------------------------------------------------->
+
+# Final Thoughts
+
+And that's it! Hopefully you have seen that `tidyquant` is a great way to streamline and even scale your workflow better than most of the options out there. And we have only scratched the surface of what it can do!
+
+You can check out the stable release of `tidyquant` from [CRAN](https://cran.r-project.org/web/packages/tidyquant/index.html), and the development release from [Github](https://github.com/mdancho84/tidyquant). Stay tuned for more to come!
+
+
+
+

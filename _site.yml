@@ -1,7 +1,7 @@
 output_dir: "."
-name: "my-website"
+name: "DV-Blog"
 navbar:
-  title: <div style="color:#009999;font-size:22px">v-blog</div>
+  title: <div style="color:#009999;font-size:22px">dv-blog</div>
   left:
     - text: "blog"
       href: blog_directory.html

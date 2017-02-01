@@ -1,3 +1,5 @@
+/*------Overall Font------------------------------*/
+
 *{
   font-family: Baskerville !important;
 }
@@ -13,6 +15,16 @@ h1 {
 p {
   font-size: 12pt;
   color: #505050;
+}
+
+/*Code font*/
+.sourceCode {
+  font-size: 11pt;
+}
+
+/*Output font*/
+pre > code {
+  font-size: 11pt;
 }
 
 /*------Navigation Bar------------------------------*/
