@@ -12,4 +12,4 @@ output:
     css: custom.css
     output_dir: "docs"
     theme: simplex
-    highlight: textmate
+    highlight: kate

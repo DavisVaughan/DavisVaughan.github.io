@@ -1,3 +1,5 @@
+
+
 /*------Font and Wording Colors------------------------------*/
 
 /*Title and H1 color*/
@@ -14,13 +16,17 @@ p {
 /*------Navigation Bar------------------------------*/
 
 /*Nav font size */
-.navbar { 
+#navbar { 
   font-size: 12pt;
 }
 
 /*Sets the text hover color on navbar*/
 .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
 color: #009999;
+}
+
+#navbar .active a{
+  color: #009999;
 }
 
 /*------Bulleted List------------------------------*/
@@ -32,6 +38,8 @@ li a {
 li a:hover {
   color: #009999;
 }
+
+/*------Table of Contents------------------------------*/
 
 /*Floating table of contents*/
 .tocify-header .tocify-item {
@@ -47,15 +55,27 @@ background-color: white ;
 color: #009999;
 }
 
+
+/*------Links------------------------------*/
 a {
   color: #009999;
 }
-
 a:hover {
   color: #505050;
 }
 
+/*------Tables------------------------------*/
+table, td, th {
+   border: 1px solid #009999;
+   border-collapse: collapse;
+}
 
+th {
+    background-color: #009999;
+    color: white;
+}
 
-
+td {
+  color: #505050;
+}
 
