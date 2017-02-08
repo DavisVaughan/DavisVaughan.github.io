@@ -70,7 +70,11 @@ dbDisconnect(cn)
 Now, redo the connection but use dplyr!
 
 ```{r}
-cn <- src_mysql(user = "user1", password = "testpassword", host = "davisdbinstance.crarljboc8to.us-west-2.rds.amazonaws.com", port = 3306, dbname = "firstdb")
+cn <- src_mysql(user = "user1", 
+                password = "testpassword", 
+                host = "davisdbinstance.crarljboc8to.us-west-2.rds.amazonaws.com", 
+                port = 3306, 
+                dbname = "firstdb")
 ```
 
 Select the apple table from that database. This does not actually pull in the data. Just makes the connection!
