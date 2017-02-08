@@ -13,22 +13,27 @@ library(tidyquant)
 library(dplyr)
 ```
 
-Connect to amazon web services using DBI package
+Connect to amazon web services using the DBI package.
 
 ```{r}
-cn <- dbConnect(drv = RMySQL::MySQL(), username = "user1", password = "testpassword", host = "davisdbinstance.crarljboc8to.us-west-2.rds.amazonaws.com", port = 3306, dbname = "firstdb")
+cn <- dbConnect(drv = RMySQL::MySQL(), 
+                username = "user1", 
+                password = "testpassword", 
+                host = "davisdbinstance.crarljboc8to.us-west-2.rds.amazonaws.com", 
+                port = 3306, 
+                dbname = "firstdb")
 ```
 
-Download stock data
+Download stock data using `tidyquant`.
 
 ```{r}
-aapl <- tq_get("AAPl")
+aapl <- tq_get("AAPL")
 ```
 
-Write the tibble to the database. 
+Write the tibble to the database using DBI. 
 
-- Already done, don't run again
-- User only has SELECT privelages anyways
+- Already done, don't run again.
+- User only has SELECT privelages anyways.
 
 
 ```{r}
@@ -37,8 +42,8 @@ Write the tibble to the database.
 
 Pull it back down using SQL in RMarkdown! 
 
-- Note that dates did get converted to chr
-- Only pulls first 1000 rows
+- Note that dates did get converted to chr.
+- Only pulls first 1000 rows.
 
 ```{sql connection=cn}
 SELECT * 
@@ -47,10 +52,11 @@ FROM apple;
 
 Pull it back down using the DBI package in R! 
 
-- Pulls all rows
+- Pulls all rows.
 
 ```{r}
 x <- dbGetQuery(cn, "SELECT * FROM apple;")
+
 head(x)
 ```
 
@@ -73,21 +79,21 @@ Select the apple table from that database. This does not actually pull in the da
 apple_table <- tbl(cn, "apple")
 ```
 
-We can use any dplyr command with this! It queries the database, and does not do the manip in R. This is insane.
+We can use almost any dplyr command with this! It queries the database, and does not do the manipulation in R. This is insane.
 
 ```{r}
 apple_table %>% select(date, adjusted)
 ```
 
-A dplyr filter
+A dplyr `filter()`.
 
 ```{r}
 apple_table %>% filter(date < "2008-01-01")
 ```
 
-IBM added to the database using copy_to. 
+IBM added to the database using `copy_to()`. 
 
-- Dont run this either, already done
+- Dont run this either, already done.
 
 ```{r}
 #ibm <- tq_get("IBM")
@@ -95,14 +101,17 @@ IBM added to the database using copy_to.
 #copy_to(cn, ibm, temporary = FALSE)
 ```
 
-Pull down IBM, then mutate it to add daily returns.
+Pull down IBM, then mutate it to add daily returns using `tidyquant`.
 
 ```{r}
 ibm_table <- tbl(cn, "ibm")
 real_tibble <- collect(ibm_table)
 real_tibble$date <- as.Date(real_tibble$date)
 
-real_tibble <- real_tibble %>% tq_mutate(ohlc_fun = Ad, mutate_fun = periodReturn, period = "daily")
+real_tibble <- real_tibble %>% 
+  tq_mutate(ohlc_fun = Ad, 
+            mutate_fun = periodReturn, 
+            period = "daily")
 
 head(real_tibble)
 ```
