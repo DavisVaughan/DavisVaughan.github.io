@@ -5,7 +5,9 @@ output: html_document
 
 
 
-| Post  	                                                       | Description  	                                                |
-|------------------------                                        |----------------------------------------------------	          |
-| [Basics of ggplot2](20170131_basics_of_ggplot2.html)           | Investigate aesthetics, common geoms, and view pretty plots. 	|
+| Post  	                                                                                        | Description  	                                                |
+|------------------------                                                                         |----------------------------------------------------	          |
+| [Basics of ggplot2](20170131_basics_of_ggplot2.html)                                            | Investigate aesthetics, common geoms, and view pretty plots. 	|
+| [AWS Database + R](20170207_aws_database.html)                                                  | Connect an AWS Redshift Database to R using DBI and dplyr.    	|
+| [Recreate RViews: Sector Correlations](20170201_recreate_rviews_blog_post.html)                 | Use tidyquant to improve upon the RViews Sector Correlations post.    	|
 
