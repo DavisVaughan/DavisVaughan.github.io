@@ -120,6 +120,6 @@ real_tibble <- real_tibble %>%
 
 
 ```{r}
-View(real_tibble)
+real_tibble
 ```
 
