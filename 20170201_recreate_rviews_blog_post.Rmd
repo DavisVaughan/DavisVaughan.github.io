@@ -47,7 +47,7 @@ Alright, now is where things get interesting. RViews created a function to impor
 ```{r}
 prices <- tq_get(etf_ticker_sector, get = "stock.prices") %>% group_by(ticker, sector)
 
-etf_returns <- prices %>% tq_transform(ohlc_fun = Cl,  transform_fun = periodReturn, 
+etf_returns <- prices %>% tq_transmute(select = close,  mutate_fun = periodReturn, 
                                        period = 'weekly', type = 'log')
 
 etf_returns

@@ -116,9 +116,10 @@ real_tibble <- real_tibble %>%
   tq_mutate(ohlc_fun = Ad, 
             mutate_fun = periodReturn, 
             period = "daily")
-
-head(real_tibble)
 ```
 
 
+```{r}
+View(real_tibble)
+```
 

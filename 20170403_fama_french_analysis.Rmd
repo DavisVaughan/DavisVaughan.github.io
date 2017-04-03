@@ -1,0 +1,94 @@
+---
+title: "Fama French 3 Factor Analysis"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits = 5)
+```
+
+For class, I had to do a Fama French 3 Factor analysis. This is it, adapted for the internet.
+
+## Required libraries
+
+```{r, message=FALSE}
+library(tidyquant)
+library(broom)
+```
+
+## Fama French factors
+
+Let's grab 2 years of the weekly fama french data.
+
+```{r, echo=FALSE}
+quandl_api_key("Nh7qxxb4pWt8FWqPsx1p")
+```
+
+```{r}
+#quandl_api_key("insert-quandl-api-key")
+
+fama_french <- tq_get("KFRENCH/FACTORS_W", get = "quandl", to = "2017-02-24")
+fama_french
+```
+
+## iShares Russell 1000 Value
+
+This comes as daily data. Again, grabbing 2 years.
+
+```{r}
+# Fama French data goes through 2017-02-24
+end_date <- as.Date("2017-02-24")
+start_date <- end_date - years(2)
+
+iwd <- tq_get("IWD", from = start_date, to = end_date)
+iwd
+```
+
+## IWD weekly returns
+
+We will need the weekly returns for the fama french analysis. The adjusted close price will be used to calculate them. Scale the returns as percentages since that is what Fama factors are in.
+
+```{r}
+iwd_weekly <- iwd %>%
+  tq_transmute(select = adjusted, 
+               col_rename ="weekly_returns",  
+               mutate_fun = periodReturn, 
+               period = "weekly") %>%
+  mutate(weekly_returns = weekly_returns * 100)
+iwd_weekly
+```
+
+## Join weekly returns and fama french dataset
+
+```{r, message=FALSE}
+fama_iwd <- left_join(iwd_weekly, fama_french) %>%
+  mutate(ret_minus_rf = weekly_returns - rf) # Subtract the risk free rate
+fama_iwd
+```
+
+## Fama French Regression
+
+```{r}
+ff_model <- lm(ret_minus_rf ~ mkt.rf + smb + hml, data = fama_iwd)
+
+estimates <- tidy(ff_model)
+estimates
+```
+
+```{r}
+stats <- glance(ff_model)
+stats
+```
+
+## Interpretation
+
+The Fama-French 3 factor model explains IWD arithmetic returns very well, with an adjusted R squared of `r stats$adj.r.squared`. The intercept of `r estimates$estimate[1]` suggests that IWD under performed the regression benchmark. The mkt.rf estimate of `r estimates$estimate[2]` represents the beta of the fund, and shows that the fund slightly under reacts to market movements. The hml (High minus Low) factor has a coefficient of `r estimates$estimate[4]`, high enough to classify this fund as a "value" fund, which makes sense given the name. Similarly, the negative smb (Small minus Big) factor of `r estimates$estimate[3]` classifies this fund as "large", which again is consistent with its name.
+
+
+
+
